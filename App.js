@@ -1,18 +1,71 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button } from 'react-native';
+import {
+	StyleSheet,
+	Text,
+	View,
+	TouchableOpacity,
+	TextInput,
+	ScrollView
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
+import TodoList from './TodoList';
 
 export default function App() {
-	const [count, setCount] = useState(100);
+	const [value, setValue] = useState('');
+	const [todos, setTodos] = useState([]);
+
+	addTodo = () => {
+		if (value.length > 0) {
+			setTodos([...todos, { text: value, key: Date.now(), checked: false }]);
+			setValue('');
+		}
+	};
+
+	checkTodo = id => {
+		setTodos(
+			todos.map(todo => {
+				if (todo.key === id) todo.checked = !todo.checked;
+				return todo;
+			})
+		);
+	};
+
+	deleteTodo = id => {
+		setTodos(
+			todos.filter(todo => {
+				if (todo.key !== id) return true;
+			})
+		);
+	};
 
 	return (
 		<View style={styles.container}>
-			<Text>You clicked {count} times.</Text>
-			<Button
-				onPress={() => setCount(count + 1)}
-				title="Click me"
-				color="red"
-				accessibilityLabel="Click this button to increase count"
-			/>
+			<Text style={styles.header}>Todo List</Text>
+			<View style={styles.textInputContainer}>
+				<TextInput
+					style={styles.textInput}
+					multiline={true}
+					placeholder="What do you want to do today?"
+					placeholderTextColor="#abbabb"
+					value={value}
+					blurOnSubmit={true}
+					onSubmitEditing={() => addTodo()}
+					onChangeText={value => setValue(value)}
+				/>
+				<TouchableOpacity onPress={() => addTodo()}>
+					<Icon name="plus" size={30} color="blue" style={{ marginLeft: 15 }} />
+				</TouchableOpacity>
+			</View>
+			<ScrollView style={{ width: '100%' }}>
+				{todos.map(item => (
+					<TodoList
+						text={item.text}
+						key={item.key}
+						checked={item.checked}
+						setChecked={() => checkTodo(item.key)}
+						deleteTodo={() => deleteTodo(item.key)} />
+				))}
+			</ScrollView>
 		</View>
 	);
 }
@@ -20,18 +73,31 @@ export default function App() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		justifyContent: 'center',
+		justifyContent: 'flex-start',
 		alignItems: 'center',
 		backgroundColor: '#F5FCFF'
 	},
-	welcome: {
+	header: {
+		marginTop: '15%',
 		fontSize: 20,
-		textAlign: 'center',
-		margin: 10
+		color: 'red',
+		paddingBottom: 10
 	},
-	instructions: {
-		textAlign: 'center',
-		color: '#333333',
-		marginBottom: 5
+	textInputContainer: {
+		flexDirection: 'row',
+		alignItems: 'baseline',
+		borderColor: 'black',
+		borderBottomWidth: 1,
+		paddingRight: 10,
+		paddingBottom: 10
+	},
+	textInput: {
+		flex: 1,
+		height: 20,
+		fontSize: 18,
+		fontWeight: 'bold',
+		color: 'black',
+		paddingLeft: 10,
+		minHeight: '3%'
 	}
 });
